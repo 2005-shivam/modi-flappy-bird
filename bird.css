@@ -1,0 +1,11 @@
+body{
+    font-family: 'Times New Roman', Times, serif;
+    text-align: center;
+    background: rgb(50, 71, 78);
+}
+#board{
+    /* background-color: skyblue; */
+    background-image: url('bg.jpeg');
+}
+
+
