@@ -28,8 +28,8 @@ let topPipeImg;
 let bottomPipeImg;
 
 //physics
-let velocityX = -2; //pipes moving speed
-let velocityY = 0; //bird jump
+let velocityX = -2;
+let velocityY = 0;
 let gravity = 0.2;
 let gameOver = false;
 let score = 0;
@@ -39,13 +39,15 @@ let bgMusic;
 let hitSound;
 // 🎵 AUDIO SECTION END
 
+let restartBtn = document.getElementById('restartBtn');
+
 window.onload = function () {
     board = document.getElementById('board');
     board.height = boardHeight;
     board.width = boardWidth;
     context = board.getContext("2d");
 
-    //load image
+    //load images
     birdImg = new Image();
     birdImg.src = "modi.png";
     birdImg.onload = function () {
@@ -69,24 +71,24 @@ window.onload = function () {
     setInterval(placePipes, 1500);
     document.addEventListener('keydown', moveBird);
     document.addEventListener('touchstart', moveBird);
+
+    restartBtn.addEventListener('click', restartGame); // ⬅️ Restart logic
 }
 
 function update() {
     requestAnimationFrame(update);
-    if (gameOver) {
-        return;
-    }
+
+    if (gameOver) return;
+
     context.clearRect(0, 0, board.width, board.height);
 
     //bird
     velocityY += gravity;
-    bird.y = Math.max(bird.y + velocityY, 0); //limit bird
+    bird.y = Math.max(bird.y + velocityY, 0);
     context.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
 
     if (bird.y > board.height) {
-        gameOver = true;
-        hitSound.play();     // 🎵 play hit sound
-        bgMusic.pause();     // 🎵 stop background music
+        triggerGameOver();
     }
 
     //pipes
@@ -94,22 +96,23 @@ function update() {
         let pipe = pipeArray[i];
         pipe.x += velocityX;
         context.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height);
+
         if (!pipe.passed && bird.x > pipe.x + pipe.width) {
-            score += 0.5; //two pipes
+            score += 0.5;
             pipe.passed = true;
         }
+
         if (detectCollision(bird, pipe)) {
-            gameOver = true;
-            hitSound.play();     // 🎵 play hit sound
-            bgMusic.pause();     // 🎵 stop background music
+            triggerGameOver();
         }
     }
 
+    //remove off-screen pipes
     while (pipeArray.length > 0 && pipeArray[0].x < -pipeWidth) {
         pipeArray.shift();
     }
 
-    //score
+    //score display
     context.fillStyle = "white";
     context.font = "45px sans-serif";
     context.fillText(score, 5, 45);
@@ -120,11 +123,11 @@ function update() {
 }
 
 function placePipes() {
-    if (gameOver) {
-        return;
-    }
+    if (gameOver) return;
+
     let randomPipeY = pipeY - pipeHeight / 4 - Math.random() * (pipeHeight / 2);
     let openingSpace = board.height / 3;
+
     let topPipe = {
         img: topPipeImg,
         x: pipeX,
@@ -134,6 +137,7 @@ function placePipes() {
         passed: false
     };
     pipeArray.push(topPipe);
+
     let bottomPipe = {
         img: bottomPipeImg,
         x: pipeX,
@@ -147,28 +151,37 @@ function placePipes() {
 
 function moveBird(event) {
     if (event.code == "Space" || event.code == "ArrowUp" || event.type === "touchstart") {
-        //start background music only once
         if (bgMusic.paused && !gameOver) {
-            bgMusic.play();  // 🎵 start background music
+            bgMusic.play(); // start background music
         }
-
-        //jump
         velocityY = -6;
-    }
-
-    //reset game
-    if (gameOver) {
-        bird.y = birdY;
-        pipeArray = [];
-        score = 0;
-        gameOver = false;
-        bgMusic.currentTime = 0; // restart music
-        bgMusic.play();          // 🎵 play background again
     }
 }
 
+function triggerGameOver() {
+    if (!gameOver) {
+        gameOver = true;
+        hitSound.play();
+        bgMusic.pause();
+        restartBtn.style.display = "inline-block"; // show restart button
+    }
+}
+
+function restartGame() {
+    // reset everything
+    bird.y = birdY;
+    velocityY = 0;
+    pipeArray = [];
+    score = 0;
+    gameOver = false;
+
+    restartBtn.style.display = "none"; // hide button again
+    bgMusic.currentTime = 0;
+    bgMusic.play();
+}
+
 function detectCollision(a, b) {
-    const padding = 8; // adjust (5–10) until it feels right
+    const padding = 8;
     return (
         a.x + padding < b.x + b.width - padding &&
         a.x + a.width - padding > b.x + padding &&
@@ -176,4 +189,3 @@ function detectCollision(a, b) {
         a.y + a.height - padding > b.y + padding
     );
 }
-
