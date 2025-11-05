@@ -1,11 +1,30 @@
-body{
+body {
     font-family: 'Times New Roman', Times, serif;
     text-align: center;
     background: rgb(50, 71, 78);
 }
-#board{
-    /* background-color: skyblue; */
+
+#board {
     background-image: url('bg.jpeg');
+    border: 2px solid white;
+    border-radius: 8px;
 }
 
+/* ⬇️ Restart Button Styling */
+#restartBtn {
+    display: none; /* hidden until game over */
+    margin-top: 15px;
+    padding: 10px 25px;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    background-color: #ff4d4d;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
 
+#restartBtn:hover {
+    background-color: #ff1a1a;
+}
